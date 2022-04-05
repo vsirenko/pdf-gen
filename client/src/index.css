@@ -1,0 +1,90 @@
+body {
+    background: #c0e6ff;
+    box-sizing: border-box;
+}
+.main {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.tamplete {
+    width: 50%;
+    height: calc(100vh - 20px);
+    border: 1px solid #909090;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.tamplete-h1 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #909090;
+}
+.tamplete-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.tamplete-info p {
+    margin: 0;
+    margin-right: 10px;
+}
+.infos {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #909090;
+}
+.column {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+.ref {
+    width: 50px;
+}
+.Description {
+    width: 250px;
+}
+.Price {
+    width: 100px;
+}
+.Quantity {
+    width: 60px;
+}
+.Total {
+    width: 60px;
+}
+.items {
+margin-top: 10px;
+background: #eee;
+width: 100%;
+
+}
+.tapletes {
+    width: 540px;
+    height: 70px;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+}
+.item {
+    padding: 5px;
+    box-sizing: border-box;
+    background: #eee;
+    margin-right: 10px;
+    height: 25px;
+    border-radius: 10px;
+}
+.special {
+    margin: 0;
+}
+.special p {
+    margin: 0;
+    font-size: 13px;
+
+}
+.special strong {
+    font-weight: 600;
+}
