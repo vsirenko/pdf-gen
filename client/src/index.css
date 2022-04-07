@@ -71,7 +71,6 @@ width: 100%;
 .tapletes {
     width: 540px;
     height: 70px;
-    margin-top: 20px;
     background: #fff;
     border-radius: 10px;
     padding: 10px;
@@ -96,4 +95,10 @@ width: 100%;
 }
 .special strong {
     font-weight: 600;
+}
+.tox-notifications-container {
+    display: none;
+}
+.btn {
+    margin-right: 10px;
 }
