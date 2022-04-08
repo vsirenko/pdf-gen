@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
+import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 import PDFViewer from 'pdf-viewer-reactjs'
 
@@ -46,6 +47,9 @@ const Pdfgen = () => {
 
   const style = `<style> @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"); *{font-family: "Roboto", sans-serif;} p {margin: 0; font-weight:normal; font-size: 13px} strong {font-size:15px; font-weight: 600; font-weight:bold;} tr, td, table, tbody {border: 1px solid #eee;} div.wrapper {padding-top: 20px; padding-left: 40px; padding-right: 30px; }  </style> `
 
+
+  const [loading, setLoading] = useState(false)
+
   const [data, setData] = useState("");
   const [items, setItems] = useState([]);
   const [name, setName] = useState("");
@@ -55,12 +59,45 @@ const Pdfgen = () => {
   const [path, setPath] = useState('')
   const [margins, setMargins] = useState({
     top: 0,
-    right: 20,
+    right: 0,
     bottom: 0,
     left: 0
   })
   const [styles, setStyles] = useState("@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap'); body { font-family: 'Roboto', sans-serif; font-size:14px; margin: 10px } p {margin: 0}")
   const ref = useRef()
+
+
+  useEffect(() => {
+    // console.log(data)
+    console.log(ref.current.iframeElement);
+  }, [ref]);
+
+
+  // get from localStorage
+  useEffect(() => {
+   const data = JSON.parse( localStorage.getItem('items'))
+   if(data) {
+    setItems(data)
+   }
+  }, []);
+
+  // set to localStorage
+  useEffect(() => {
+    localStorage.setItem('items', `${JSON.stringify(items)}`);
+  }, [items])
+
+
+  const cmToPx = (cm) => {
+    return cm * 37.79527559055118;
+  }
+
+  const marginPreviewSetter = (key) => {
+    let css = document.createElement('style'); 
+
+  }
+
+
+  // refresh margins state
   const onMarginChange = (key, value) => {
     switch (key) {
       case 'top':
@@ -84,24 +121,8 @@ const Pdfgen = () => {
         break;
     }
   }
-  
 
-
-  useEffect(() => {
-    console.log(data)
-  }, [data])
-  useEffect(() => {
-  
-   const data = JSON.parse( localStorage.getItem('items'))
-   if(data) {
-    setItems(data)
-   }
-  }, [])
-  useEffect(() => {
-    localStorage.setItem('items', `${JSON.stringify(items)}`);
-  }, [items])
-
-
+  // add custom template
   const addTemplate = () => {
     setItems((prev) => [
       ...prev,
@@ -116,24 +137,30 @@ const Pdfgen = () => {
 
   };
 
+  // post request to generate pdf file
   const generatePdf = () => {
     console.log(data);
-  
-    axios.post(`${host}/generate-pdf`, {data})
+    setLoading(true);
+    axios.post(`${host}/generate-pdf`, {margins ,dataHtml: data})
     .then(res => {
         console.log(res.data)
-        setPath(res.data)
+        setPath(res.data);
+        setLoading(false)
     })
   }
 
+  // refresh template state
   const addToData = (string) => {
     setData(`${data} ${string}`);
   };
+
+
+
   return (
-    <div style={{ display: "flex", justifyContent: 'space-around'}}>
+    <div style={{ display: "flex", flexDirection: 'column', alignItems: 'center'}}>
       <div
         style={{
-          width: '794px',
+          width: '834px',
           background: "#fff",
           padding: "10px",
           boxSizing: "border-box",
@@ -148,7 +175,8 @@ const Pdfgen = () => {
           value={data}
           init={{
             setup: editor => {
-            console.log(editor)
+            console.log(editor.iframeElement)
+            
             var onAction = function (autocompleteApi, rng, value) {
             editor.selection.setRng(rng);
             editor.insertContent(value);
@@ -182,7 +210,7 @@ const Pdfgen = () => {
             }
             });
            },
-            menubar: false,
+            menubar: true,
             plugins: "table code advtable lists fullscreen hr autoresize ",
             toolbar:
               "bold italic hr  forecolor backcolor| " +
@@ -203,11 +231,19 @@ const Pdfgen = () => {
         <Button  variant="contained" sx={{marginRight: '10px'}} className="btn" onClick={addTemplate}>
           Add Template
         </Button>
-        <Button onClick={handleOpen} sx={{marginRight: '10px'}}  variant="contained">
-            prewiv
+        <Button disabled={loading} onClick={handleOpen} sx={{marginRight: '10px'}}  variant="contained">
+            Preview
         </Button>
 
-        <Button sx={{marginRight: '10px'}} variant="contained" className="btn" onClick={generatePdf}>generate pdf</Button>
+        <LoadingButton sx={{marginRight: '10px'}} loading={loading} variant="contained" className="btn" onClick={generatePdf}>Generate PDF</LoadingButton>
+
+        <div style={{marginTop: '20px', display: 'grid', gridGap: '15px'}}>
+          <TextField label="Margin top (in cm)" value={margins.top} onChange={(e) => {onMarginChange('top', Number(e.target.value))}}/>
+          <TextField label="Margin right (in cm)" value={margins.right} onChange={(e) => {onMarginChange('right', Number(e.target.value))}}/>
+          <TextField label="Margin bottom (in cm)" value={margins.bottom} onChange={(e) => {onMarginChange('bottom', Number(e.target.value))}}/>
+          <TextField label="Margin left (in cm)" value={margins.left} onChange={(e) => {onMarginChange('left', Number(e.target.value))}}/>
+        </div>
+
        </div>
 
       </div>
@@ -217,7 +253,7 @@ const Pdfgen = () => {
 
       <div>
         <div
-         style={{width: '300px'}}
+         style={{width: '300px', marginTop: '20px'}}
         >
         </div>
         <div className="tapletes">
