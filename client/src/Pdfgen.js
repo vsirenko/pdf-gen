@@ -67,11 +67,6 @@ const Pdfgen = () => {
   const ref = useRef()
 
 
-  useEffect(() => {
-    // console.log(data)
-    console.log(ref.current.iframeElement);
-  }, [ref]);
-
 
   // get from localStorage
   useEffect(() => {
@@ -86,14 +81,22 @@ const Pdfgen = () => {
     localStorage.setItem('items', `${JSON.stringify(items)}`);
   }, [items])
 
+  useEffect(() => {
+    marginPreviewSetter(margins)
+  }, [margins])
 
   const cmToPx = (cm) => {
-    return cm * 37.79527559055118;
+    return cm * 37.8;
   }
 
-  const marginPreviewSetter = (key) => {
-    let css = document.createElement('style'); 
-
+  const marginPreviewSetter = (margins) => {
+    console.log(margins)
+    if(window.tinymce) {
+      window.tinymce.editors[0].contentWindow.document.body.style.paddingLeft = `${cmToPx(margins.left)}px`;
+      window.tinymce.editors[0].contentWindow.document.body.style.paddingRight = `${cmToPx(margins.right)}px`;
+      window.tinymce.editors[0].contentWindow.document.body.style.paddingTop = `${cmToPx(margins.top)}px`;
+      window.tinymce.editors[0].contentWindow.document.body.style.paddingBottom = `${cmToPx(margins.bottom)}px`;
+    }
   }
 
 
@@ -106,7 +109,6 @@ const Pdfgen = () => {
 
       case 'right':
         setMargins({...margins, right: value})
-        setStyles(`@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap'); body { font-family: 'Roboto', sans-serif; font-size:14px; padding:${value}px } p {margin: 0}`)
         break;
 
       case 'bottom':
@@ -153,7 +155,6 @@ const Pdfgen = () => {
   const addToData = (string) => {
     setData(`${data} ${string}`);
   };
-
 
 
   return (
@@ -211,12 +212,59 @@ const Pdfgen = () => {
             });
            },
             menubar: true,
-            plugins: "table code advtable lists fullscreen hr autoresize ",
+            plugins: "table code advtable lists fullscreen hr autoresize image",
             toolbar:
-              "bold italic hr  forecolor backcolor| " +
+              "image | bold italic hr  forecolor backcolor| " +
               "alignleft aligncenter alignright alignjustify | indent outdent | " +
               "table tableinsertdialog tablecellprops tableprops advtablerownumbering ",
+            /* enable title field in the Image dialog*/
+            image_title: true,
+            /* enable automatic uploads of images represented by blob or data URIs*/
+            automatic_uploads: true,
+            /*
+              URL of our upload handler (for more details check: https://www.tiny.cloud/docs/configure/file-image-upload/#images_upload_url)
+              images_upload_url: 'postAcceptor.php',
+              here we add custom filepicker only to Image dialog
+            */
+            file_picker_types: 'image',
+            /* and here's our custom image picker*/
+            file_picker_callback: function (cb, value, meta) {
+              var input = document.createElement('input');
+              input.setAttribute('type', 'file');
+              input.setAttribute('accept', 'image/*');
 
+              /*
+                Note: In modern browsers input[type="file"] is functional without
+                even adding it to the DOM, but that might not be the case in some older
+                or quirky browsers like IE, so you might want to add it to the DOM
+                just in case, and visually hide it. And do not forget do remove it
+                once you do not need it anymore.
+              */
+
+              input.onchange = function () {
+                var file = this.files[0];
+
+                var reader = new FileReader();
+                reader.onload = function () {
+                  /*
+                    Note: Now we need to register the blob in TinyMCEs image blob
+                    registry. In the next release this part hopefully won't be
+                    necessary, as we are looking to handle it internally.
+                  */
+                  var id = 'blobid' + (new Date()).getTime();
+                  var blobCache =  window.tinymce.activeEditor.editorUpload.blobCache;
+                  var base64 = reader.result.split(',')[1];
+                  var blobInfo = blobCache.create(id, file, base64);
+                  blobCache.add(blobInfo);
+
+                  /* call the callback and populate the Title field with the file name */
+                  cb(blobInfo.blobUri(), { title: file.name });
+                };
+                reader.readAsDataURL(file);
+              };
+
+              input.click();
+            },
             content_style: styles
           }}
         />

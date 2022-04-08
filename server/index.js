@@ -46,7 +46,7 @@ app.post('/generate-pdf', (req, res) => {
         }
     };
 
-    const style = '<style> @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"); *{font-family: "Roboto", sans-serif;} p {margin: 0; font-weight:normal;} strong {font-size:15px; font-weight: 600; font-weight:bold;} hr { border: 1px solid #eee;} div.wrapper { } body {margin: 0px} td, th {padding: 0.4rem;} </style> '
+    const style = '<style> @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"); *{font-family: "Roboto", sans-serif;} p {margin: 0; font-weight:normal;} strong {font-size:15px; font-weight: 600; font-weight:bold;} hr { border: 1px solid #eee;} div.wrapper { } body {margin: 0px padding: 0px !important} td, th {padding: 0.4rem;} </style> '
 
     const string = data;
     const ress = `${style} <div class="wrapper">${string}</div>`
